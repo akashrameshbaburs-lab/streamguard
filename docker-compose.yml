@@ -1,0 +1,141 @@
+# ---------------------------------------------------------------------------
+# StreamGuard — Real-Time Fraud & Anomaly Detection
+# docker-compose: RabbitMQ + PostgreSQL + trainer (one-shot) + api + consumer
+#                 + notifier + simulator. One Dockerfile, many commands.
+# ---------------------------------------------------------------------------
+
+x-app-env: &app-env
+  PG_DSN: postgresql://streamguard:streamguard@postgres:5432/streamguard
+  AMQP_URL: amqp://streamguard:streamguard@rabbitmq:5672/
+  MODEL_DIR: /app/models
+
+x-deps-healthy: &deps-healthy
+  postgres:
+    condition: service_healthy
+  rabbitmq:
+    condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: streamguard
+      POSTGRES_PASSWORD: streamguard
+      POSTGRES_DB: streamguard
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U streamguard -d streamguard"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: streamguard
+      RABBITMQ_DEFAULT_PASS: streamguard
+    ports:
+      - "5673:5672"       # AMQP
+      - "15673:15672"     # management UI
+    volumes:
+      - rabbitdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+
+  # one-shot: trains the first model before the stack goes live
+  trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "scripts/train.py", "--rows", "50000", "--notes", "initial training"]
+    environment:
+      <<: *app-env
+      TRAIN_ROWS: "50000"
+      RANDOM_SEED: "42"
+    volumes:
+      - models:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "3300"]
+    environment:
+      <<: *app-env
+      ALERT_THRESHOLD: ${ALERT_THRESHOLD:-0.75}
+    ports:
+      - "3300:3300"
+    volumes:
+      - models:/app/models
+    depends_on:
+      <<: *deps-healthy
+      trainer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3300/healthz', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 18
+    restart: unless-stopped
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "app.consumer"]
+    environment:
+      <<: *app-env
+      ALERT_THRESHOLD: ${ALERT_THRESHOLD:-0.75}
+      ML_WEIGHT: ${ML_WEIGHT:-0.9}
+      FUSION_GAMMA: ${FUSION_GAMMA:-0.15}
+      MODEL_POLL_SECONDS: "3"
+    volumes:
+      - models:/app/models
+    depends_on:
+      <<: *deps-healthy
+      trainer:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  notifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "app.notifier"]
+    environment:
+      <<: *app-env
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    depends_on: *deps-healthy
+    restart: unless-stopped
+
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "app.simulator"]
+    environment:
+      <<: *app-env
+      EVENTS_PER_SEC: ${EVENTS_PER_SEC:-20}
+      FRAUD_RATE: ${FRAUD_RATE:-0.025}
+    depends_on: *deps-healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  rabbitdata:
+  models:

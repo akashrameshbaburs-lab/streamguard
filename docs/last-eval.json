@@ -1,0 +1,105 @@
+{
+  "evaluatedAt": "2026-10-20T08:23:21Z",
+  "alertThreshold": 0.75,
+  "events": {
+    "totalGroundTruth": 8000,
+    "fraudGroundTruth": 176,
+    "fraudRate": 0.022,
+    "scoredEvents": 8182
+  },
+  "confusion": {
+    "tp": 94,
+    "fp": 30,
+    "fn": 82,
+    "precision": 0.7581,
+    "recall": 0.5341,
+    "f1": 0.6267
+  },
+  "alerts": {
+    "count": 125
+  },
+  "detectionLatencyMs": {
+    "avg": 32.0,
+    "p50": 23.0,
+    "p95": 109.2,
+    "max": 150.8
+  },
+  "throughput": {
+    "measuredEventsPerSec": 19.95,
+    "windowSeconds": 60
+  },
+  "ruleBreakdown": [
+    {
+      "rule": "ml_anomaly",
+      "hits": 124,
+      "tp": 94,
+      "fp": 30
+    },
+    {
+      "rule": "velocity_burst",
+      "hits": 51,
+      "tp": 40,
+      "fp": 11
+    },
+    {
+      "rule": "impossible_travel",
+      "hits": 42,
+      "tp": 42,
+      "fp": 0
+    },
+    {
+      "rule": "new_device_amount",
+      "hits": 8,
+      "tp": 8,
+      "fp": 0
+    },
+    {
+      "rule": "amount_spike",
+      "hits": 3,
+      "tp": 3,
+      "fp": 0
+    }
+  ],
+  "perPattern": [
+    {
+      "fraudEvents": 22,
+      "alerted": 5,
+      "recall": 0.2273,
+      "alerts": 5,
+      "precision": 1.0,
+      "pattern": "amount_spike"
+    },
+    {
+      "fraudEvents": 32,
+      "alerted": 32,
+      "recall": 1.0,
+      "alerts": 32,
+      "precision": 1.0,
+      "pattern": "impossible_travel"
+    },
+    {
+      "fraudEvents": 8,
+      "alerted": 8,
+      "recall": 1.0,
+      "alerts": 8,
+      "precision": 1.0,
+      "pattern": "new_device_amount"
+    },
+    {
+      "fraudEvents": 0,
+      "alerted": 0,
+      "recall": null,
+      "alerts": 30,
+      "precision": 0.0,
+      "pattern": "normal"
+    },
+    {
+      "fraudEvents": 114,
+      "alerted": 49,
+      "recall": 0.4298,
+      "alerts": 49,
+      "precision": 1.0,
+      "pattern": "velocity_burst"
+    }
+  ]
+}

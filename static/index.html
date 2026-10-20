@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StreamGuard — Real-Time Fraud Detection</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">&#x1F6E1;</span>
+    <h1>StreamGuard</h1>
+    <span class="tag">real-time fraud &amp; anomaly detection</span>
+  </div>
+  <div class="header-right">
+    <span id="conn" class="badge badge-off">connecting&hellip;</span>
+    <span id="model-badge" class="badge">model v&ndash;</span>
+  </div>
+</header>
+
+<main>
+  <!-- ============ KPI cards ============ -->
+  <section class="kpis">
+    <div class="card kpi">
+      <div class="kpi-label">Events processed</div>
+      <div class="kpi-value" id="kpi-events">&ndash;</div>
+      <div class="kpi-sub"><span id="kpi-eps">&ndash;</span> evt/s (last 60s)</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Flagged rate</div>
+      <div class="kpi-value" id="kpi-fraud-rate">&ndash;</div>
+      <div class="kpi-sub"><span id="kpi-flagged">&ndash;</span> flagged events</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Alerts</div>
+      <div class="kpi-value alert-color" id="kpi-alerts">&ndash;</div>
+      <div class="kpi-sub">threshold <span id="kpi-threshold">&ndash;</span></div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Detection latency</div>
+      <div class="kpi-value"><span id="kpi-avg-delay">&ndash;</span></div>
+      <div class="kpi-sub">avg &middot; p95 <span id="kpi-p95-delay">&ndash;</span> ms</div>
+    </div>
+  </section>
+
+  <!-- ============ throughput sparkline ============ -->
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2>Throughput &mdash; last 60 s</h2>
+      <span class="chart-legend"><span class="dot dot-throughput"></span>events/s
+        <span class="dot dot-alerts"></span>alerts/s</span>
+    </div>
+    <svg id="sparkline" viewBox="0 0 600 120" preserveAspectRatio="none" aria-label="throughput sparkline"></svg>
+  </section>
+
+  <!-- ============ model + retrain ============ -->
+  <section class="card model-card">
+    <div class="model-head">
+      <h2>Model</h2>
+      <button id="retrain-btn" class="btn btn-retrain">Retrain</button>
+    </div>
+    <div class="model-grid" id="model-grid">
+      <div><span class="muted">version</span><div id="m-version">&ndash;</div></div>
+      <div><span class="muted">primary</span><div id="m-primary">&ndash;</div></div>
+      <div><span class="muted">IF precision</span><div id="m-if-p">&ndash;</div></div>
+      <div><span class="muted">IF recall</span><div id="m-if-r">&ndash;</div></div>
+      <div><span class="muted">IF F1</span><div id="m-if-f1">&ndash;</div></div>
+      <div><span class="muted">LR precision</span><div id="m-lr-p">&ndash;</div></div>
+      <div><span class="muted">LR recall</span><div id="m-lr-r">&ndash;</div></div>
+      <div><span class="muted">LR F1</span><div id="m-lr-f1">&ndash;</div></div>
+    </div>
+    <div id="retrain-status" class="retrain-status"></div>
+  </section>
+
+  <!-- ============ alert feed ============ -->
+  <section class="card alerts-card">
+    <h2>Live alerts <span id="alert-count" class="badge">&ndash;</span></h2>
+    <div id="alerts" class="alerts"></div>
+  </section>
+</main>
+
+<footer>
+  StreamGuard &mdash; synthetic-data demo. Rules engine + IsolationForest / LogisticRegression fusion.
+  SSE updates every second.
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

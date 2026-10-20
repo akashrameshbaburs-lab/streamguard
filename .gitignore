@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Model artifacts — regenerate with scripts/train.py or POST /api/retrain
+models/
+*.joblib
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test/demo outputs
+*.log
+# ...but keep the committed demo evidence transcript
+!docs/demo-run.log

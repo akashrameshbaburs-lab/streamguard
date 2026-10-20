@@ -1,0 +1,1 @@
+"""StreamGuard application package."""
