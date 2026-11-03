@@ -367,7 +367,7 @@ def fuse_risk(rule_score: float, ml_score: float,
     noisier model score relative to deterministic rules.
 
     Worked examples with defaults (ml_weight=0.9, gamma=0.15, threshold=0.75):
-      rule=0.90 ml=0.30 -> max(0.90, 0.27) + 0.15*0.27 = 0.94  (travel: rule alert)
+      rule=0.90 ml=0.30 -> max(0.90, 0.27) + 0.15*0.30 = 0.945  (travel: rule alert)
       rule=0.20 ml=0.90 -> max(0.20, 0.81) + 0.15*0.20 = 0.84  (ML-only alert)
       rule=0.64 ml=0.10 -> max(0.64, 0.09) + 0.15*0.10 = 0.655 (power user: no alert)
       rule=0.64 ml=0.80 -> max(0.64, 0.72) + 0.15*0.64 = 0.816 (burst: corroborated)

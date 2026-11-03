@@ -1,5 +1,7 @@
 # StreamGuard — Real-Time Fraud & Anomaly Detection
 
+![CI](https://github.com/akashrameshbaburs-lab/streamguard/actions/workflows/ci.yml/badge.svg)
+
 A production-shaped streaming pipeline that scores payment events for fraud
 in real time: a **deterministic rules engine** and **two ML models**
 (IsolationForest + Logistic Regression) whose scores are **fused** into a
@@ -125,6 +127,17 @@ then streams 20 events/s (~2.5% fraud) forever; `scripts/demo.ps1` adds a
 fast 5000-event burst and asserts every endpoint works.
 
 RabbitMQ management UI: http://localhost:15673 (streamguard/streamguard).
+
+## Tests
+
+The unit suite is fully offline — no RabbitMQ, Postgres, model artifact or
+network access is required. It covers the rules engine, feature windowing,
+risk fusion and synthetic-data determinism:
+
+```powershell
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest tests/ -q
+```
 
 ## Measured results
 
